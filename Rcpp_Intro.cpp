@@ -53,6 +53,7 @@ arma::mat rmvnorm(int n,
 
   // repreat mu from (p,) to (n, p)
   // Cholesky decomposition of variance-covariance matrix
+  // an algorithm to compute matrix version of sqrt()
   arma::mat Y = arma::repmat(mu, 1, n).t() + Z * arma::chol(sigma);
 
   return Y;
