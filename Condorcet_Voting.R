@@ -1,8 +1,5 @@
 library(Rcpp)
 
-# optional
-# redirect cache directory of rcpp
-options(rcpp.cache.dir = "D:\\Programming\\Advanced_R\\Rcpp_temp")
 sourceCpp("Condorcet_Voting.cpp")
 
 mat_ballot <- matrix(

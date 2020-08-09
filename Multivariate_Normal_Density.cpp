@@ -14,7 +14,7 @@ arma::vec dmvnorm_arma(const arma::mat &x,
   
   /*
   x: (n, k)
-  mu: (k,)
+  mu: (1,k)
   sigma: (k, k)
   */
   // init

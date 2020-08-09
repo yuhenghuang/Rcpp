@@ -1,9 +1,5 @@
 library(Rcpp)
 
-# optional
-# redirect cache directory of rcpp
-options(rcpp.cache.dir = "D:\\Programming\\Advanced_R\\Rcpp_temp")
-
 sourceCpp("Chain_Ladder_Analysis.cpp")
 
 
