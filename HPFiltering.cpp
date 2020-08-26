@@ -245,7 +245,7 @@ List hp_filter(const arma::vec &y,
     do {
       s *= BETA;
       r_norm_plus = compute_r_norm_plus(v, mu1, mu2, dv, dmu1, dmu2, s, t, par);
-    } while (r_norm_plus <= (1-ALPHA*s) * r_norm);
+    } while (r_norm_plus > (1-ALPHA*s) * r_norm);
 
     // update values
     v += s * dv;
