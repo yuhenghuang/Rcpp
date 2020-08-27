@@ -30,7 +30,7 @@ static const double MU = 1.2;
 // Parameters
 struct Params {
   double lambda;
-  arma::vec filter;
+  arma::vec filter_d, filter_dd;
   arma::vec dd1, dd2, dd3, dy;
 
   Params(uword n, const arma::vec &y, double l): lambda(l) {
@@ -42,12 +42,14 @@ struct Params {
     dd2.fill(-4);
     dd3.fill(1);
 
-    filter = {1, -2, 1};
+    filter_dd = {1, -4, 6, -4, 1};
+
+    filter_d = {1, -2, 1};
     dy.resize(n);
     dy.fill(0);
     for (uword i=0; i<n; ++i) 
       for (uword j=0; j<3; ++j)
-        dy[i] += y[i+j] * filter[j];
+        dy[i] += y[i+j] * filter_d[j];
   }
 };
 
@@ -159,7 +161,8 @@ double compute_r_norm_plus(const arma::vec &v,
   arma::vec mu2_plus = mu2 + s * dmu2;
 
   arma::vec r_v = par->dy;
-  r_v -= DD_filter(v_plus);
+  // r_v -= DD_filter(v_plus);
+  r_v -= arma::conv(v_plus, par->filter_dd, "same");
   r_v -= mu1_plus;
   r_v += mu2_plus;
 
@@ -209,7 +212,8 @@ List hp_filter(const arma::vec &y,
     J2_inv = f2_inv % mu2;
 
     v_rhs = par->dy;
-    v_rhs -= DD_filter(v);
+    // v_rhs -= DD_filter(v);
+    v_rhs -= arma::conv(v, par->filter_dd, "same");
 
     // save the temporary result for computing norm of r dual
     r_v = v_rhs;
@@ -245,7 +249,7 @@ List hp_filter(const arma::vec &y,
     do {
       s *= BETA;
       r_norm_plus = compute_r_norm_plus(v, mu1, mu2, dv, dmu1, dmu2, s, t, par);
-    } while (r_norm_plus <= (1-ALPHA*s) * r_norm);
+    } while (r_norm_plus > (1-ALPHA*s) * r_norm);
 
     // update values
     v += s * dv;
@@ -259,7 +263,7 @@ List hp_filter(const arma::vec &y,
   }
 
   arma::vec x = y;
-  x -= arma::conv(v, par->filter);
+  x -= arma::conv(v, par->filter_d);
 
   return List::create(
     _["x"] = x
