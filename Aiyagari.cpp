@@ -71,20 +71,28 @@ void plc_inner(Params *par,
 
 arma::mat plc_iter(Params *par) {
   arma::mat plc_c(par->num_a_grid, par->num_l_grid, arma::fill::ones);
+  plc_c *= 0.5 * par->a_max;
 
   uword count = 0;
   double err = 1.0;
+
+  /*
+  In this algorithm
+  aprime is actually a_t
+  par->a is a_t+1
+  */
   arma::mat c, aprime, plc_c_orig;
 
   while (err > 1e-5 && count < 1000) {
     plc_c_orig = plc_c;
     c = arma::pow(plc_c, -par->mu);
     c *= par->beta * (1.0+par->r);
-    c.for_each( [par](double &x){ x = std::pow(x, 1.0/par->mu); } );
+    c.for_each( [par](double &x){ x = std::pow(x, -1.0/par->mu); } );
 
     aprime = c;
-    aprime.each_col( [par](arma::vec &x){ x += par->a; x -= par->w*par->l;});
-    aprime /= (1.0+par->r);
+    aprime.each_col() += par->a;
+    aprime.each_row() -= par->w * par->l.t();
+    aprime /= 1.0+par->r;
 
     plc_inner(par, c, aprime, plc_c);
 
@@ -109,7 +117,7 @@ arma::mat demo_iter(Params *par,
 
   arma::vec itv = par->a.rows(1, par->num_a_grid-1) - par->a.rows(0, par->num_a_grid-2);
 
-  uword count = 0;
+  uword count = 0, idx;
   double err = 1.0;
   arma::rowvec temp;
   arma::mat demo_orig;
@@ -117,7 +125,6 @@ arma::mat demo_iter(Params *par,
     demo_orig = demo;
     demo.fill(arma::fill::zeros);
 
-    uword idx;
     for (uword j=0; j<par->num_l_grid; ++j)
       for (uword i=0; i<par->num_a_grid; ++i) {
         temp = demo_orig(i, j) * par->pi.row(j);
