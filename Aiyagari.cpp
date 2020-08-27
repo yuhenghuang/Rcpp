@@ -132,8 +132,8 @@ arma::mat demo_iter(Params *par,
           demo.row(0) += temp;
         else {
           idx = std::lower_bound(par->a.begin(), par->a.end(), plc(i, j)) - par->a.begin();
-          demo.row(idx-1) += temp * ((plc(i,j) - par->a[idx-1]) / itv[idx-1]);
-          demo.row(idx) += temp * ((par->a[idx] - plc(i,j)) / itv[idx-1]);
+          demo.row(idx-1) += temp * ((par->a[idx] - plc(i,j)) / itv[idx-1]);
+          demo.row(idx) += temp * ((plc(i,j) - par->a[idx-1]) / itv[idx-1]);
         }
       }
     
