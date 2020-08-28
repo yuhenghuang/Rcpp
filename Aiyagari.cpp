@@ -1,11 +1,11 @@
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::plugins(cpp11)]]
-
 #include <algorithm>
 
 #include <RcppArmadillo.h>
 #include <omp.h>
-#include "Tauchen.cpp"
+#include <Tauchen.hpp>
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 
 using namespace Rcpp;
 using arma::uword;
@@ -16,10 +16,9 @@ struct Params {
 
   const double beta = 0.96,
                alpha = 0.36,
-               delta = 0.08,
-               rho = 0.4,
-               mu = 3.0,
-               sigma = 0.4;
+               delta = 0.08;
+          
+  double rho, mu, sigma;
 
   const double a_max = 40.0,
                b = 3.0;
@@ -30,7 +29,7 @@ struct Params {
 
   arma::mat pi;
 
-  Params() {
+  Params(double r, double m, double s): rho(r), mu(m), sigma(s) {
     Tauchen x(rho, sigma*std::sqrt(1-rho*rho), 0, 3, num_l_grid);
     l = arma::exp(x.state_values);
     L = arma::sum(l % x.stationary_distributions);
@@ -58,14 +57,18 @@ void plc_inner(Params *par,
   // ...
   uword sup;
   arma::vec temp;
+
+  #pragma omp parallel private(sup, temp)
   for (uword j=0; j<par->num_l_grid; ++j) {
     sup = std::lower_bound(par->a.begin(), par->a.end(), aprime(0, j)) - par->a.begin();
 
-    arma::interp1(aprime.col(j), c.col(j), par->a.rows(sup, par->num_a_grid-1), temp);
+    arma::interp1(aprime.col(j), c.col(j), par->a.rows(sup, par->num_a_grid-1), temp, "linear", c(par->num_a_grid-1, j));
     plc_c.col(j).rows(sup, par->num_a_grid-1) = temp;
 
-    plc_c.col(j).rows(0, sup-1) = (1.0+par->r) * par->a.rows(0, sup-1);
-    plc_c.col(j).rows(0, sup-1) += par->phi + par->w * par->l[j];
+    if (sup>0) {
+      plc_c.col(j).rows(0, sup-1) = (1.0+par->r) * par->a.rows(0, sup-1);
+      plc_c.col(j).rows(0, sup-1) += par->phi + par->w * par->l[j];
+    }
   }
 }
 
@@ -86,6 +89,7 @@ arma::mat plc_iter(Params *par) {
   while (err > 1e-5 && count < 1000) {
     plc_c_orig = plc_c;
     c = arma::pow(plc_c, -par->mu);
+    c *= par->pi.t();
     c *= par->beta * (1.0+par->r);
     c.for_each( [par](double &x){ x = std::pow(x, -1.0/par->mu); } );
 
@@ -146,17 +150,21 @@ arma::mat demo_iter(Params *par,
   return demo;
 }
 
-
+//' @export
 // [[Rcpp::export]]
-List Aiyagari() {
+List Aiyagari(double rho,
+              double mu,
+              double sigma) {
+  // ...
+  omp_set_num_threads(2);
 
-  Params *par = new Params();
+  Params *par = new Params(rho, mu, sigma);
 
   double err = 1.0;
   uword count = 0;
 
   double r_low = -0.04, r_up = (1-par->beta) / par->beta, knew;
-  arma::vec plc, demo;
+  arma::mat plc, demo;
   while (err>1e-4 && count<20) {
     par->update((r_low + r_up) / 2.0);
 
@@ -164,7 +172,8 @@ List Aiyagari() {
     plc.for_each( [par](double &x){ if (x>par->a_max) x=par->a_max; else if (x<-par->phi) x=-par->phi; } );
 
     demo = demo_iter(par, plc);
-    knew = arma::sum(demo % plc);
+
+    knew = arma::accu(demo % plc);
 
     err = std::abs(knew - par->k);
 
