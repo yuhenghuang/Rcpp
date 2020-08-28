@@ -58,7 +58,7 @@ void plc_inner(Params *par,
   uword sup;
   arma::vec temp;
 
-  #pragma omp parallel private(sup, temp)
+  #pragma omp parallel for private(sup, temp)
   for (uword j=0; j<par->num_l_grid; ++j) {
     sup = std::lower_bound(par->a.begin(), par->a.end(), aprime(0, j)) - par->a.begin();
 
@@ -130,6 +130,8 @@ arma::mat demo_iter(Params *par,
     demo.fill(arma::fill::zeros);
 
     for (uword j=0; j<par->num_l_grid; ++j)
+
+      #pragma omp parallel for private(idx, temp)
       for (uword i=0; i<par->num_a_grid; ++i) {
         temp = demo_orig(i, j) * par->pi.row(j);
         if (plc(i, j)==par->a[0])
@@ -156,6 +158,8 @@ List Aiyagari(double rho,
               double mu,
               double sigma) {
   // ...
+
+  // set num of cores
   omp_set_num_threads(2);
 
   Params *par = new Params(rho, mu, sigma);
