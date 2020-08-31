@@ -6,6 +6,7 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(openmp)]]
 
 using namespace Rcpp;
 using arma::uword;
@@ -130,7 +131,6 @@ arma::mat demo_iter(Params *par,
     demo.fill(arma::fill::zeros);
 
     for (uword j=0; j<par->num_l_grid; ++j)
-
       #pragma omp parallel for private(idx, temp)
       for (uword i=0; i<par->num_a_grid; ++i) {
         temp = demo_orig(i, j) * par->pi.row(j);
@@ -156,11 +156,12 @@ arma::mat demo_iter(Params *par,
 // [[Rcpp::export]]
 List Aiyagari(double rho,
               double mu,
-              double sigma) {
+              double sigma,
+              int cores = 1) {
   // ...
 
   // set num of cores
-  omp_set_num_threads(2);
+  omp_set_num_threads(cores);
 
   Params *par = new Params(rho, mu, sigma);
 
