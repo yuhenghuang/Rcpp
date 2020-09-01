@@ -4,6 +4,8 @@
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
+using namespace Rcpp;
+
 // [[Rcpp::export]]
 List tauchen_test(const double rho,
                   const double sigmu_u,

@@ -1,9 +1,8 @@
+#ifndef _TAUCHEN_MINE
+#define _TAUCHEN_MINE
+
 #include <RcppArmadillo.h>
 
-// [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::depends(RcppArmadillo)]]
-
-using namespace Rcpp;
 using arma::uword;
 
 class Tauchen {
@@ -68,3 +67,5 @@ Tauchen::Tauchen(const double rho,
   this->P = pi;
   this->stationary_distributions = converge(n, pi);
 }
+
+#endif
