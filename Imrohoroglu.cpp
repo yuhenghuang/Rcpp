@@ -14,7 +14,6 @@ arma::cube value_iter(arma::mat &v,
                       const double &delta) {
   // ...
   Rcout << "start value function iteration..." << std::endl;
-  omp_set_num_threads(2);
 
   uword n=0, num_grids=v.n_rows, i;
   double err = 1.;
@@ -51,7 +50,6 @@ void demo_iter(arma::mat &demo,
                const arma::mat &pi) {
   // ...
   Rcout << "start demographic loops..." << std::endl;
-  omp_set_num_threads(2);
 
   uword n=0, num_grids=demo.n_rows, choice;
   double err = 1.;
@@ -86,6 +84,8 @@ List imrohoroglu(const double &beta,
                  const double &theta,
                  const uword num_grids = 301) {
   // ...
+  omp_set_num_threads(4);
+
   arma::mat bc_tran = {{0.9375, 0.0625}, {0.0625, 0.9375}};
   bc_tran = arma::repmat(bc_tran, 2, 2);
   bc_tran.swap_rows(1, 2);
