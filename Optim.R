@@ -1,6 +1,6 @@
 library(Rcpp)
 
-Sys.setenv("PKG_CXXFLAGS"="-I/opt/optimlib/include")
+Sys.setenv("PKG_CXXFLAGS"="-I/opt/optimlib/include/")
 
 sourceCpp("Optim.cpp")
 

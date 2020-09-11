@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
-#include <optim.hpp>
+#include "optim.hpp"
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 
 using namespace Rcpp;
 using arma::uword;
@@ -104,8 +105,8 @@ int logistic_test() {
 
   optim::algo_settings_t settings;
 
-  settings.gd_method = 6;
-  settings.gd_settings.step_size = 0.1;
+  settings.gd_settings.method = 6;
+  settings.gd_settings.par_step_size = 0.1;
 
   std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 
