@@ -151,6 +151,18 @@ arma::mat demo_iter(Params *par,
   return demo;
 }
 
+
+//' 
+//' @brief Aiyagari(1993) Model.
+//' dynamic programming solved by endogenous grid points algorithm
+//' 
+//' @param rho Trend of business cycle
+//' @param mu Fluctuation of business cycle
+//' @param sigma Depreciation rate
+//' @param cores Num. of cores used for openmp
+//' 
+//' @return List capital, interest rate, wage, wealth distribution and policy of households
+//' 
 //' @export
 // [[Rcpp::export]]
 List Aiyagari(double rho,
