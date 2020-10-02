@@ -21,7 +21,7 @@ template<typename T, class Predicate=std::equal_to<T>>
 class ThreadQueue {
   private:
     std::queue<T> q;
-    std::mutex m;
+    std::mutex m; // only one thread can either uses push or pop.
     std::condition_variable cv;
     T end_condition;
     Predicate pred;
@@ -30,15 +30,25 @@ class ThreadQueue {
     ThreadQueue(const T& ec): end_condition(ec) {}
 
     void push(T&& elem) {
-      std::unique_lock<std::mutex> lck(m);
+      std::unique_lock<std::mutex> lock(m);
+      
       q.push(elem);
+
+      // good practice to manually unlock before notifying
+      lock.unlock();
       cv.notify_one();
     }
 
     bool pop(T& elem) {
-      std::unique_lock<std::mutex> lck(m);
-      // why the overloaded version, bool !q.empty(), does not work...
-      cv.wait(lck, [this](){ return !q.empty(); });
+      // own mutex
+      std::unique_lock<std::mutex> lock(m);
+      /*
+        1. mutex released and execution suspended before awaking (being awakened)
+        2. Being awakened by notify_one() ( or notify_all() )
+        3. mutex reacquired, check the condition
+        4. If true -> move to next line, else -> go back to 1
+      */
+      cv.wait(lock, [this](){ return !q.empty(); });
 
       if (!q.empty()) {
         elem = std::move(q.front());
