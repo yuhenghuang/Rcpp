@@ -30,12 +30,10 @@ class ThreadQueue {
     ThreadQueue(const T& ec): end_condition(ec) {}
 
     void push(T&& elem) {
-      std::unique_lock<std::mutex> lock(m);
+      std::lock_guard<std::mutex> lock(m);
       
       q.push(elem);
 
-      // good practice to manually unlock before notifying
-      lock.unlock();
       cv.notify_one();
     }
 
@@ -50,6 +48,7 @@ class ThreadQueue {
       */
       cv.wait(lock, [this](){ return !q.empty(); });
 
+      // if is not necessary?
       if (!q.empty()) {
         elem = std::move(q.front());
         q.pop();
