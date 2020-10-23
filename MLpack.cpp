@@ -14,7 +14,7 @@ List kmeans_ml(const arma::mat &data,
 	arma::Row<size_t> assignments;
 	mlpack::kmeans::KMeans<> k;
 	k.Cluster(data, clusters, assignments);
-
+  
 	return List::create(
 		_["clusters"] = clusters,
 		_["result"] = assignments
