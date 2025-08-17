@@ -4,7 +4,11 @@ library(lmtest)
 library(sandwich)
 library(plm)
 
-sourceCpp("ClusteredSE.cpp")
+# Sys.setenv("PKG_CXXSTD"="-std=c++17")
+# Sys.setenv("PKG_CXXFLAGS"="-O3 -Xclang -fopenmp -I/opt/homebrew/opt/libomp/include")
+# Sys.setenv("PKG_LIBS"="-L/opt/homebrew/opt/libomp/lib -lomp")
+
+sourceCpp("ClusteredSE.cpp", verbose = TRUE)
 
 data(diamonds, package = "ggplot2")
 
@@ -33,6 +37,6 @@ library(rbenchmark)
 
 benchmark(
   rcpp = cluster_regression(X, Y, G),
-  # rraw = cluster_raw_r(),
+  rraw = cluster_raw_r(),
   order = "relative", replications = 100
 )

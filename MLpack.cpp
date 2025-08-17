@@ -1,10 +1,17 @@
-#include <RcppMLPACK.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::depends(RcppEnsmallen)]]
+// [[Rcpp::depends(mlpack)]]
+// [[Rcpp::plugins(cpp17)]]
+
+
+#include <Rcpp/Rcpp>
+#include <mlpack.h>
+
 #include <mlpack/methods/logistic_regression/logistic_regression.hpp>
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>
 #include <mlpack/core/tree/cover_tree.hpp>
 #include <mlpack/methods/kmeans/kmeans.hpp>
 
-// [[Rcpp::depends(RcppMLPACK)]]
 using namespace Rcpp;
 
 // [[Rcpp::export]]
@@ -12,7 +19,7 @@ List kmeans_ml(const arma::mat &data,
 							 const int &clusters) {
 	// ...
 	arma::Row<size_t> assignments;
-	mlpack::kmeans::KMeans<> k;
+	mlpack::KMeans<> k;
 	k.Cluster(data, clusters, assignments);
   
 	return List::create(
@@ -31,7 +38,7 @@ List logistic_regression(const arma::mat &train,
   labelsur = arma::conv_to<arma::Row<size_t>>::from(labels);
 
   // Initialize with the default arguments. TODO: support more arguments>
-  mlpack::regression::LogisticRegression<> lrc(train, labelsur);
+  mlpack::LogisticRegression<> lrc(train, labelsur);
   arma::rowvec parameters = lrc.Parameters();
   List return_val;
   if (test.isNotNull()) {
@@ -50,24 +57,31 @@ List logistic_regression(const arma::mat &train,
 }
 
 
-using namespace mlpack::neighbor;
-using namespace mlpack::tree;
-using namespace mlpack::metric;
+template<typename DistanceType = mlpack::LMetric<2, true>,
+         typename StatisticType = mlpack::NeighborSearchStat<mlpack::NearestNeighborSort>,
+         typename MatType = arma::mat>
+using KDTree = mlpack::BinarySpaceTree<DistanceType,
+                               StatisticType,
+                               MatType,
+                               mlpack::HRectBound,
+                               mlpack::MidpointSplit>;
+
+// using namespace mlpack::neighbor;
+// using namespace mlpack::tree;
+// using namespace mlpack::metric;
 // [[Rcpp::export]]
 List nn_ml(const arma::mat &data,
            const int k) {
   // ...
-  CoverTree<LMetric<2, true>,
-            NeighborSearchStat<NearestNeighborSort>,
+  mlpack::CoverTree<mlpack::LMetric<2, true>,
+            mlpack::NeighborSearchStat<mlpack::NearestNeighborSort>,
             arma::mat> tree(data);
 
-  NeighborSearch<NearestNeighborSort, 
-                 LMetric<2, true>,
-                 arma::mat,
-                 mlpack::tree::KDTree<LMetric<2, true>,
-                                      NeighborSearchStat<NearestNeighborSort>,
-                                      arma::mat>> cover_tree_search(tree);
-                                  
+  mlpack::NeighborSearch<mlpack::NearestNeighborSort, 
+                        mlpack::LMetric<2, true>,
+                        arma::mat,
+                        mlpack::CoverTree
+                        > cover_tree_search(tree);
   arma::Mat<size_t> cover_tree_neighbors;
   arma::mat cover_tree_distance;
   cover_tree_search.Search(k, cover_tree_neighbors, cover_tree_distance);

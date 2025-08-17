@@ -9,3 +9,4 @@ res$a
 res$c
 
 sum(res$c)
+sum(res$a)

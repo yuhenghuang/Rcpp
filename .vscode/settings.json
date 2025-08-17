@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "algorithm": "cpp",
+    "vector": "cpp",
+    "string": "cpp",
+    "queue": "cpp",
+    "condition_variable": "cpp",
+    "armadillo": "cpp",
+    "rcpp": "cpp"
+  }
+}

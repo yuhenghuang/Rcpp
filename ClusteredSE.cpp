@@ -1,5 +1,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::plugins(cpp11)]]
+/*
+  // [[Rcpp::plugins(cpp11)]]
+*/
 
 #include <RcppArmadillo.h>
 #include <omp.h>
@@ -10,7 +12,7 @@
 using namespace Rcpp;
 using arma::uword;
 
-const static int NUM_THREAD = 2;
+const static int NUM_THREAD = 10;
 
 //' Regression with cluster
 //'

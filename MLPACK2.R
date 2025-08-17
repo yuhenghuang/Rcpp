@@ -1,6 +1,6 @@
-library(RcppMLPACK)
+library(Rcpp)
 
-Rcpp::sourceCpp("MLPACK2.cpp")
+sourceCpp("MLPACK2.cpp", verbose = TRUE)
 
 
 logistic_regression(matrix(c(1, 2, 3, 1, 2, 3), nrow=2, byrow=TRUE), matrix(c(1L, 1L, 0L), nrow = 1))

@@ -1,7 +1,7 @@
 library(Rcpp)
 library(rbenchmark)
 
-sourceCpp("MLpack.cpp")
+sourceCpp("MLpack.cpp", verbose = TRUE)
 
 data(wine, package = "HDclassif")
 

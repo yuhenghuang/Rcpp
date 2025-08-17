@@ -1,7 +1,12 @@
-#include <RcppArmadillo.h>
-#include "optim.hpp"
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(cpp14)]]
+
+#include <omp.h>
+#include <RcppArmadillo.h>
+
+#define OPTIM_USE_RCPP_ARMADILLO
+#include <optim.hpp>
+
 
 using namespace Rcpp;
 using arma::uword;

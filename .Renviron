@@ -1,0 +1,3 @@
+PKG_CXXSTD=-std=c++17
+PKG_CXXFLAGS=-O3 -Xclang -fopenmp -I/opt/homebrew/opt/libomp/include -I/opt/optim/header_only_version
+PKG_LIBS=-L/opt/homebrew/lib -L/opt/homebrew/opt/libomp/lib -lomp

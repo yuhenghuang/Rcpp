@@ -1,12 +1,18 @@
-#include <RcppMLPACK.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::depends(RcppEnsmallen)]]
+// [[Rcpp::depends(mlpack)]]
+// [[Rcpp::plugins(cpp17)]]
+
+#include <Rcpp.h>
+#include <mlpack.h>
+
 #include <mlpack/methods/linear_regression/linear_regression.hpp>
 #include <mlpack/methods/kmeans/kmeans.hpp>
 #include <mlpack/methods/logistic_regression/logistic_regression.hpp>
 #include <mlpack/methods/naive_bayes/naive_bayes_classifier.hpp>
 #include <mlpack/core/tree/cover_tree.hpp>
-#include <mlpack/core/metrics/lmetric.hpp>
+#include <mlpack/core/metrics/metrics.hpp>
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>
-// [[Rcpp::depends(RcppMLPACK)]]
 
 
 using namespace Rcpp;
@@ -23,7 +29,8 @@ arma::vec linear_regression(const arma::mat& X,
 
   Rcout << X.n_rows << ", " << X.n_cols << std::endl;
   Rcout << Y.n_rows << ", " << Y.n_cols << std::endl;
-  mlpack::regression::LinearRegression lr(X, Y.t(), lambda, intercept);
+  arma::rowvec Y_t = Y.t();
+  mlpack::LinearRegression lr(X, Y_t, lambda, intercept);
 
 
   arma::rowvec Ybar(Y.n_elem);
@@ -40,7 +47,7 @@ List kmeans(const arma::mat& data,
   Rcout << data.n_rows << ", " << data.n_cols << std::endl;
   arma::Row<size_t> assignments;
   arma::mat centroids(data.n_rows, clusters);
-  mlpack::kmeans::KMeans<> k;
+  mlpack::KMeans<> k;
   k.Cluster(data, clusters, assignments, centroids);
 
   Rcout << centroids.n_rows << ", " << centroids.n_cols << std::endl;
@@ -62,7 +69,7 @@ List logistic_regression(const arma::mat& train,
 
   labelsur = arma::conv_to<arma::Row<size_t>>::from(labels);
 
-  mlpack::regression::LogisticRegression<> lrc(train, labelsur);
+  mlpack::LogisticRegression<> lrc(train, labelsur);
 
   arma::rowvec parameters = lrc.Parameters();
 
@@ -94,7 +101,7 @@ List naive_bayes_classifier(const arma::mat& train,
 
   labelsur = arma::conv_to<arma::Row<size_t>>::from(labels);
 
-  mlpack::naive_bayes::NaiveBayesClassifier<> nbc(train, labelsur, classes);
+  mlpack::NaiveBayesClassifier<> nbc(train, labelsur, classes);
 
   List return_val;
   if (test.isNotNull()) {
@@ -122,17 +129,16 @@ List naive_bayes_classifier(const arma::mat& train,
 List nn_ml(const arma::mat &data,
            const int k) {
   // ...
-  mlpack::tree::StandardCoverTree<mlpack::metric::EuclideanDistance, 
-                                  mlpack::neighbor::NeighborSearchStat<mlpack::neighbor::NearestNeighborSort>,
-                                  arma::mat> tree(data);
+  mlpack::StandardCoverTree<mlpack::EuclideanDistance, 
+                            mlpack::NeighborSearchStat<mlpack::NearestNeighborSort>,
+                            arma::mat> tree(data);
 
-  mlpack::neighbor::NeighborSearch<mlpack::neighbor::NearestNeighborSort,
-                                   mlpack::metric::LMetric<2>,
-                                   arma::mat,
-                                   mlpack::tree::StandardCoverTree> coverTreeSearch(
-                                     std::move(tree),
-                                     mlpack::neighbor::SINGLE_TREE_MODE, 
-                                     0.05);
+  mlpack::NeighborSearch<mlpack::NearestNeighborSort,
+                        mlpack::LMetric<2>,
+                        arma::mat,
+                        mlpack::StandardCoverTree> coverTreeSearch(std::move(tree),
+                                                                  mlpack::SINGLE_TREE_MODE, 
+                                                                  0.05);
 
   arma::Mat<size_t> neighborsCoverTree;
   arma::mat distanceCoverTree;

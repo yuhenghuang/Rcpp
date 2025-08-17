@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "name": "Mac",
+      "includePath": [
+          "${workspaceFolder}/**",
+          "/opt/homebrew/lib/R/include",
+          "/opt/homebrew/lib/R/4.5/site-library/Rcpp/include",
+          "/opt/homebrew/lib/R/4.5/site-library/RcppEigen/include",
+          "/opt/homebrew/lib/R/4.5/site-library/RcppArmadillo/include",
+          "/opt/homebrew/lib/R/4.5/site-library/RcppEnsmallen/include",
+          "/opt/homebrew/lib/R/4.5/site-library/mlpack/include",
+          "/opt/optim/header_only_version",
+          "/opt/homebrew/opt/libomp/include"
+      ],
+      "defines": [],
+      "compilerPath": "/usr/bin/clang++",
+      "compilerArgs": [
+        "-std=c++17",
+        "-stdlib=libc++"
+      ],
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+      ],
+      "intelliSenseMode": "macos-clang-x64"
+    }
+  ],
+  "version": 4
+}
